@@ -1,0 +1,17 @@
+*.o
+*.elf
+*.bin
+*.exe
+*.out
+*.cmd
+*.img
+*.iso
+
+kernel.bin
+kernel.elf
+
+*log
+*.dmp
+
+.vscode/
+.idea/
