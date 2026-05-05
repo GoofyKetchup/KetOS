@@ -25,15 +25,21 @@ void set_idt_gate(int n, uint32_t handler, struct idt_entry *idt) {
     idt[n].offset_high = (handler >> 16) & 0xFFFF;
 }
 
-void isr0_handler() {
-    vga_print("KERNEL PANIC : DIVISION BY ZERO EXCEPTION\n");
-    while(1) {
-        __asm__("hlt");
-        }
-}
-
-void isr_default_handler() {
-    // Nothing
+void isr_handler(int interrupt) {
+    switch(interrupt) {
+        case 0:
+            vga_print("KERNEL PANIC: DIVISION BY ZERO\n");
+            while(1) {
+                asm volatile("hlt");
+            }
+            break;
+        default:
+            vga_print("KERNEL PANIC: UNKNOWN INTERRUPTION\n");
+            while(1) {
+                __asm__ volatile("hlt");
+            }
+            break;
+    }
 }
 
 void idt_init() {

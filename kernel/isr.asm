@@ -1,5 +1,4 @@
-extern isr0_handler
-extern isr_default_handler
+extern isr_handler
 global isr0
 global isr_default
 
@@ -7,7 +6,9 @@ isr0:
     cli
     pusha
 
-    call isr0_handler
+    push 0
+    call isr_handler
+    add esp, 4
 
     popa
     sti
@@ -17,7 +18,9 @@ isr_default:
     cli
     pusha
 
-    call isr_default_handler
+    push 255
+    call isr_handler
+    add esp, 4
 
     popa
     sti
