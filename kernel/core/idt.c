@@ -231,7 +231,7 @@ void irq1_keyboard_c() {
         execute_command(input_buffer);
         input_buffer[0] = '\0';
         input_len = 0;
-        terminal_print_string((const char*)"\nSYS_USER@KETOS - $ ");
+        terminal_print_string((const char*)"\nMAIN_KETOS:/> ");
         return;
     }
 
