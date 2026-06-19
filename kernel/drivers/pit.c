@@ -5,7 +5,7 @@
 #define PIT_COMMAND 0x43
 
 #define PIT_FREQUENCY 1193182
-#define HZ 100
+#define HZ 1000
 
 void timer_init() {
     uint16_t divisor = (uint16_t)(PIT_FREQUENCY / HZ);
