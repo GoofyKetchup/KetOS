@@ -1,5 +1,6 @@
 #include "..\drivers\terminal.h"
 #include "..\drivers\io.h"
+#include "..\drivers\pit.h"
 #include "..\lib\console.h"
 #include "..\..\os\cli\shell.h"
 #include "idt.h"
@@ -7,7 +8,9 @@
 void kernel_main() {
     __asm__ volatile("cli");
     terminal_print_string((const char*)"Loading...\n");
+    remap_pic();
     idt_init();
+    timer_init();
     terminal_init();
     terminal_print_string((const char*)"KETOS 0.0.1\n\n");
     __asm__ volatile("sti");

@@ -32,6 +32,7 @@ global isr28
 global isr29
 global isr30
 global isr31
+global isr32
 global isr33
 
 extern isr_handler
@@ -88,6 +89,7 @@ ISR_NOERRCODE 28
 ISR_NOERRCODE 29
 ISR_ERRCODE 30
 ISR_NOERRCODE 31
+ISR_NOERRCODE 32
 ISR_NOERRCODE 33
 
 isr_common_stub:

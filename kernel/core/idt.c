@@ -6,6 +6,8 @@
 #include "..\lib\console.h"
 #include "..\..\os\cli\shell.h"
 
+volatile uint64_t tick = 0;
+
 // PIC Ports
 #define PIC_MASTER_CMD 0x20
 #define PIC_MASTER_DATA 0x21
@@ -71,6 +73,7 @@ extern void isr28();
 extern void isr29();
 extern void isr30();
 extern void isr31();
+extern void isr32();
 extern void isr33();
 
 idt_entry_t idt[256];
@@ -101,7 +104,7 @@ void remap_pic() {
     outb(PIC_MASTER_DATA, 0x01);
     outb(PIC_SLAVE_DATA, 0x01);
     
-    outb(PIC_MASTER_DATA, 0xFD);
+    outb(PIC_MASTER_DATA, 0xFC);
     outb(PIC_SLAVE_DATA, 0xFF);
 }
 
@@ -142,9 +145,8 @@ void idt_init() {
     idt_set_gate(29, (uint32_t)isr29, 0x08, 0x8E);
     idt_set_gate(30, (uint32_t)isr30, 0x08, 0x8E);
     idt_set_gate(31, (uint32_t)isr31, 0x08, 0x8E);
+    idt_set_gate(32, (uint32_t)isr32, 0x08, 0x8E);
     idt_set_gate(33, (uint32_t)isr33, 0x08, 0x8E);
-
-    remap_pic();
 
     idt_load(&idt_ptr);
 }
@@ -189,6 +191,7 @@ void isr_handler(regs_t* r) {
         case 29: terminal_print_string((const char*)"VMM communication exception.\n"); return;
         case 30: panic((const char*)"SECURITY EXCEPTION"); break;
         case 31: terminal_print_string((const char*)"Reserved 31.\n"); return;
+        case 32: tick++; outb(0x20, 0x20); return;
         case 33:
             irq1_keyboard_c();
             outb(0x20, 0x20);
