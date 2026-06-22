@@ -1,11 +1,18 @@
 [BITS 16]
 [ORG 0x1000]
 
+# Some const
+E820_COUNT equ 0x8000
+E820_ENTRIES equ 0x8004
+E820_ENTRY_SIZE equ 24
+SMAP_SIG equ 0x534D4150
+
 start:
     mov [BOOT_DRIVE], dl
     call load_gdt
     call enable_a20
     call load_krnl
+    call get_memory_map
     jmp enable_pm
 
 ; a20 to access +1MB
@@ -66,6 +73,55 @@ disk_error: ; if error while reading the disk
     hlt
     jmp $
 
+; get memory map using e820
+get_memory_map:
+    pusha
+    push es
+
+    xor ax, ax
+    mov es, ax
+    mov di, E820_ENTRIES
+    xor ebx, ebx
+    xor bp, bp
+
+.e820_loop:
+    mov eax, 0xE820
+    mov edx, SMAP_SIG
+    mov ecx, E820_ENTRY_SIZE
+
+    mov dword [es:di + 20], 1
+
+    int 0x15 ; bios e820 call
+    jc .fail
+
+    cmp eax, SMAP_SIG
+    jne .fail
+
+    mov eax, [es:di + 8]
+    mov edx, [es:di + 12]
+    or eax, edx
+    jz .skip_entry
+
+    inc bp
+    add di, E820_ENTRY_SIZE
+
+.skip_entry:
+    cmp ebx, 0
+    jne .e820_loop
+    mov [es:E820_COUNT], bp
+
+    clc
+    jmp .done
+.fail:
+    stc
+    mov si, FAIL_2_GET_MEMORY_MAP
+    call print_string
+
+.done:
+    pop es
+    popa
+    ret ; return
+
 print_string:
 .next_char:
     mov al, [si]
@@ -114,6 +170,5 @@ MOV_KERNEL:
 
 BOOT_DRIVE db 0
 EXTENDED_BIOS_NOT_SUPPORTED db "Sorry, Your device is not compatible with KetOS.", 13, 10, 0
-DISK_ERROR_MSG db "Sorry, An error occured while reading disk", 13, 10, 0
-
-times 512-($-$$) db 0
+DISK_ERROR_MSG db "Sorry, An error occured while reading disk.", 13, 10, 0
+FAIL_2_GET_MEMORY_MAP db "Sorry, An error occured while getting memory map.", 13, 10, 0
